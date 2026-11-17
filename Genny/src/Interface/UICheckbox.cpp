@@ -4,7 +4,9 @@
 #include "IndexBaron.h"
 #include "GennyVST.h"
 #include "UIContextMenu.h"
+#if defined(_WIN32)
 #include "lib/platform/win32/win32frame.h"
+#endif
 
 UICheckbox::UICheckbox (const CRect& size, IControlListener* listener, int32_t tag, UTF8StringPtr title, GennyInterface* iface, CBitmap* bitmap, int32_t style)
 	:CCheckBox(size, listener, tag, title, bitmap, style),

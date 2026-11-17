@@ -3,7 +3,9 @@
 #include "YM2612.h"
 #include "GennyVST.h"
 #include "Genny2612.h"
-#include "intrin.h"
+#if defined(_MSC_VER)
+#include <intrin.h>
+#endif
 
 VGMLogger::VGMLogger() :
 	_ymChip(nullptr),

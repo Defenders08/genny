@@ -1,4 +1,7 @@
 #include "GennyInterface.h"
+#if defined(__APPLE__)
+#include "platform/mac_support.h"
+#endif
 #include "../resource.h"
 #include "UIBitmap.h"
 #include "IndexBaron.h"
@@ -133,6 +136,12 @@ GennyInterface::GennyInterface(void* effect, GennyVST* owner)
 	_channels[9] = 0;
 
 	hInstance = 0;
+
+	// Размер редактора нужен хосту до effEditOpen (FL спрашивает effEditGetRect заранее)
+	rect.left = 0;
+	rect.top = 0;
+	rect.right = 954;
+	rect.bottom = 602;
 }
 
 GennyInterface::~GennyInterface(void)
@@ -148,6 +157,9 @@ void GennyInterface::dragEnd()
 
 bool GennyInterface::open(void* ptr)
 {
+#if defined(__APPLE__)
+	gennyEnsureVstGuiInit();
+#endif
 #ifdef BUILD_VST
 	AEffGUIEditor::open(ptr);
 #else

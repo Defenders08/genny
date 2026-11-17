@@ -2,10 +2,12 @@
 #include "Genny2612.h"
 #include "VirtualInstrument.h"
 #include "gmnames.h"
-#include "lib/platform\win32\win32frame.h"
+#if defined(_WIN32)
+#include "lib/platform/win32/win32frame.h"
+#endif
 #include "lib/vstguiinit.h"
 
-//#include "C:\Program Files (x86)\Visual Leak Detector\include\vld.h"
+//#include "C:/Program Files (x86)/Visual Leak Detector/include/vld.h"
 
 #ifdef BUILD_VST
 
@@ -220,7 +222,7 @@ void VSTBase::resume()
 {
 	_sampleRate = updateSampleRate();
 	sampleRateChanged(_sampleRate);
-	__super::resume();
+	AudioEffectX::resume();
 }
 
 void VSTBase::sampleRateChanged(double newRate)

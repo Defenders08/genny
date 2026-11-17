@@ -20,7 +20,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA */
 #include <stdio.h>
 #include <math.h>
 
-#include "resampler\Fir_Resampler.h"
+#include "resampler/Fir_Resampler.h"
 
 static void gen_sinc(double rolloff, int width, double offset, double spacing, double scale, int count, sample_t *out )
 {
@@ -162,6 +162,8 @@ double Resampler::Fir_Resampler_time_ratio( double new_factor, double rolloff )
   skip_bits = 0;
 
   step = STEREO * (int) floor( fstep );
+  if ( step <= 0 )
+    step = STEREO;  /* вырожденный коэффициент: не даём циклу ресемплера зависнуть */
 
   ratio = fstep;
   fstep = fmod( fstep, 1.0 );

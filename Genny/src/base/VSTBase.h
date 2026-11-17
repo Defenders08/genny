@@ -2,7 +2,9 @@
 #ifdef BUILD_VST
 #include "public.sdk/source/vst2.x/audioeffectx.h"
 #include "plugin-bindings/aeffguieditor.h"
+#if defined(_WIN32)
 #include <objidl.h>
+#endif
 typedef void* VSTEditor;
 namespace VSTGUI { class PluginGUIEditor; }
 

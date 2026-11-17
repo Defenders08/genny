@@ -1,9 +1,15 @@
 #include "GennyInterfaceObject.h"
+#if defined(__APPLE__)
+#include "platform/text_prompt.h"
+#endif
+
 #include "GennyInterface.h"
 #include "IndexBaron.h"
 #include "GennyVST.h"
 #include "Genny2612.h"
+#if defined(_WIN32)
 #include "lib/platform/win32/win32frame.h"
+#endif
 #include "../resource.h"
 
 GennyInterfaceObject::GennyInterfaceObject(GennyInterfaceObject* parent)
@@ -77,6 +83,7 @@ int GennyInterfaceObject::getInstrumentIndex(int index)
 GennyInterfaceObject* editingObject;
 int editingValue;
 char editingValueString[80];
+#if !defined(__APPLE__)
 BOOL CALLBACK TypeValueProc(HWND hwndDlg,
 	UINT message,
 	WPARAM wParam,
@@ -107,6 +114,7 @@ BOOL CALLBACK TypeValueProc(HWND hwndDlg,
 }
 
 
+#endif
 int copiedValue = -1;
 void GennyInterfaceObject::onMouseUpContext(int tag)
 {
@@ -219,7 +227,18 @@ void GennyInterfaceObject::onMouseUpContext(int tag)
 		}
 		else if (r == 3)
 		{
-			LPWSTR str = MAKEINTRESOURCEW(IDD_DIALOG2);
+			#if defined(__APPLE__)
+			editingObject = this;
+
+			if (extParam != nullptr)
+				editingValue = (int)extParam->get();
+			else
+				editingValue = (int)getVst()->getCurrentPatch()->getFromBaron(idx);
+
+			itoa(editingValue, editingValueString, 10);
+			if (genny::promptText("Type Value", "Enter a value", editingValueString, editingValueString, sizeof(editingValueString)))
+#else
+LPWSTR str = MAKEINTRESOURCEW(IDD_DIALOG2);
 
 			MEMORY_BASIC_INFORMATION mbi;
 			static int dummyVariable;
@@ -238,6 +257,7 @@ void GennyInterfaceObject::onMouseUpContext(int tag)
 				editingValue = (int)getVst()->getCurrentPatch()->getFromBaron(idx);
 
 			if (DialogBoxW(hMod, str, winFrame->getPlatformWindow(), (DLGPROC)TypeValueProc) == IDOK)
+#endif
 			{
 				try
 				{

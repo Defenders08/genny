@@ -67,9 +67,17 @@ struct GennyData
 
 	long readLong()
 	{
+#if defined(__APPLE__)
+		// Формат Windows: long занимает 8 байт на диске, но значимы младшие 32 бита.
+		// На macOS long 64-битный, поэтому читаем явно 32 бита, иначе съезжает разбор.
+		int dat32 = *((int*)&data[dataPos]);
+		dataPos += 8;
+		return (long)dat32;
+#else
 		long dat = *((long*)&data[dataPos]);
 		dataPos += 8;
 		return dat;
+#endif
 	}
 
 	double readDouble()
@@ -151,14 +159,12 @@ struct GennyData
 		if (size - dataPos < 8)
 			resize(size + 8);
 
-		data[dataPos] = ((char*)&b)[0];
-		data[dataPos + 1] = ((char*)&b)[1];
-		data[dataPos + 2] = ((char*)&b)[2];
-		data[dataPos + 3] = ((char*)&b)[3];
-		data[dataPos + 4] = ((char*)&b)[4];
-		data[dataPos + 5] = ((char*)&b)[5];
-		data[dataPos + 6] = ((char*)&b)[6];
-		data[dataPos + 7] = ((char*)&b)[7];
+		// Пишем младшие 32 бита + нули: так же, как это читает Windows-версия
+		const int value32 = (int)b;
+		for (int i = 0; i < 4; ++i)
+			data[dataPos + i] = ((char*)&value32)[i];
+		for (int i = 4; i < 8; ++i)
+			data[dataPos + i] = 0;
 
 		dataPos += 8;
 	}

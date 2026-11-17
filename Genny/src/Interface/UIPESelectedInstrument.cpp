@@ -1,4 +1,8 @@
 #include "UIPESelectedInstrument.h"
+#if defined(__APPLE__)
+#include "platform/text_prompt.h"
+#endif
+
 #include "UIBitmap.h"
 #include "../resource.h"
 #include "IndexBaron.h"
@@ -11,7 +15,9 @@
 #include "UISpinner.h"
 #include "UICheckbox.h"
 #include "UICheckBoxNum.h"
+#if defined(_WIN32)
 #include "lib/platform/win32/win32frame.h"
+#endif
 
 const int kRadioFMOn = 949304;
 const int kRadioFMOff = 949305;
@@ -244,6 +250,7 @@ UIPESelectedInstrument::~UIPESelectedInstrument(void)
 
 
 char pingpongEditString[80];
+#if !defined(__APPLE__)
 BOOL CALLBACK TypePingPongProc(HWND hwndDlg,
 	UINT message,
 	WPARAM wParam,
@@ -272,6 +279,7 @@ BOOL CALLBACK TypePingPongProc(HWND hwndDlg,
 }
 
 
+#endif
 void UIPESelectedInstrument::valueChanged (CControl* control)
 {
 	if (control == _rangeSliderLow)
@@ -417,7 +425,12 @@ void UIPESelectedInstrument::valueChanged (CControl* control)
 			{
 				if (r == GennyExtParam::kNumPingPongSettings)
 				{
-					LPWSTR str = MAKEINTRESOURCEW(IDD_DIALOG3);
+					#if defined(__APPLE__)
+					snprintf(pingpongEditString, sizeof(pingpongEditString), "LLCCRR");
+					if (genny::promptText("Ping-pong panning", "Enter the panning pattern", pingpongEditString, pingpongEditString, sizeof(pingpongEditString)))
+						setting = pingpongEditString;
+#else
+LPWSTR str = MAKEINTRESOURCEW(IDD_DIALOG3);
 
 					MEMORY_BASIC_INFORMATION mbi;
 					static int dummyVariable;
@@ -427,6 +440,7 @@ void UIPESelectedInstrument::valueChanged (CControl* control)
 					{
 						setting = pingpongEditString;
 					}
+#endif
 				}
 				else if (listIndex != 0)
 					setting = GennyExtParam::kDefaultPingPongSettings[listIndex];

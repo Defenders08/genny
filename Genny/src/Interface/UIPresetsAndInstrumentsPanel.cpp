@@ -8,7 +8,9 @@
 #include "UIPresetsPanel.h"
 #include "UIImportPanel.h"
 #include "UIMegaMidiPanel.h"
+#if defined(_WIN32)
 #include "lib/platform/win32/win32frame.h"
+#endif
 
 CMouseEventResult PresetsButton::onMouseDown(CPoint& where, const CButtonState& buttons)
 {

@@ -1,5 +1,8 @@
 # GENNY 
 Sega Genesis/Megadrive YM2612/SN76486 Emulation in the form of a VST/FL Plugin!
+
+> **macOS (Apple Silicon / Intel):** сборка VST2 под macOS — см. [README-macOS.md](README-macOS.md).
+> Собирается CMake, GUI на Cocoa, поддерживаются arm64 и x86_64.
 I'm new to the whole public repository thing so if I'm doing anything wrong or ridiculous please let me know!
 
 First of all right out the gate:

@@ -1,10 +1,10 @@
 #include "WaveData.h"
 #include "GennyLoaders.h"
-#include "resampler\libresample.h"
-#include "resampler\Fir_Resampler.h"
+#include "resampler/libresample.h"
+#include "resampler/Fir_Resampler.h"
 #include <math.h> 
 #include <stdio.h>
-#include "filters\source\include\DspFilters\ChebyshevI.h"
+#include "filters/source/include/DspFilters/ChebyshevI.h"
 
 static const int kFormatHeader1 = 'FFIR';
 static const int kFormatHeader2 = 'EVAW';
@@ -86,6 +86,10 @@ void WaveData::reprocess(int dacSamplerate, unsigned char* presampledData, int p
 
 	float pitchOffset = pow(2.0, ((_pitch / 50) / 12.0));
 	dacSamplerate /= pitchOffset;
+
+	// Защита: без корректных частот ресемплинг вырождается в бесконечный цикл
+	if (originalSampleRate <= 0 || dacSamplerate <= 0 || originalDataSize <= 0)
+		return;
 
 	if (sampleRate == dacSamplerate)
 		return;

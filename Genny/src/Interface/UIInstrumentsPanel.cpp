@@ -25,7 +25,7 @@ UIInstrumentsPanel::UIInstrumentsPanel(const CRect& size, UIPresetsAndInstrument
 	_scrollBarDown(nullptr),
 	_instrumentsTab(nullptr),
 	_currentDrag(-1),
-	_preparingToDrag(false),
+	_preparingToDrag(nullptr),
 	_ignoreRescroll(false)
 {
 	CFrame* frame = getInterface()->getFrame();

@@ -4,7 +4,9 @@
 #include "IndexBaron.h"
 #include "GennyVST.h"
 #include "UIContextMenu.h"
+#if defined(_WIN32)
 #include "lib/platform/win32/win32frame.h"
+#endif
 
 UISlider::UISlider (const CRect& size, IControlListener* listener, int32_t tag, int32_t iMinPos, int32_t iMaxPos, CBitmap* handle, CBitmap* background, GennyInterface* iface, const CPoint& offset, const int32_t style):
 	CSlider(size, listener, tag, iMinPos, iMaxPos, handle, background, offset, style),

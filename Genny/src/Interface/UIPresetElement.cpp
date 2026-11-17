@@ -1,4 +1,8 @@
 #include "UIPresetElement.h"
+#if defined(__APPLE__)
+#include "platform/text_prompt.h"
+#endif
+
 #include "UIBitmap.h"
 #include "../resource.h"
 #include "IndexBaron.h"
@@ -6,7 +10,9 @@
 #include "UIImage.h"
 #include "UIPresetsPanel.h"
 #include "GennyLoaders.h"
+#if defined(_WIN32)
 #include "lib/platform/win32/win32frame.h"
+#endif
 
 //Constructor stuff
 //======================================================================================
@@ -86,6 +92,7 @@ bool UIPresetElement::onWheel (const CPoint& where, const CMouseWheelAxis& axis,
 
 GennyPatch* editingPatchName = nullptr;
 char szItemName[80];
+#if !defined(__APPLE__)
 BOOL CALLBACK RenameItemProc(HWND hwndDlg,
 	UINT message,
 	WPARAM wParam,
@@ -118,6 +125,7 @@ BOOL CALLBACK RenameItemProc(HWND hwndDlg,
 	return FALSE;
 }
 
+#endif
 CMouseEventResult UIPresetElement::onMouseDown (CPoint& where, const CButtonState& buttons)
 {
 	if(buttons.isRightButton())
@@ -138,7 +146,16 @@ CMouseEventResult UIPresetElement::onMouseDown (CPoint& where, const CButtonStat
 
 			//b->PlugHost->Dispatcher(b->HostTag, FHD_SetNewColor, 0, 5);
 #else
-			LPWSTR str = MAKEINTRESOURCEW(IDD_DIALOG1);
+			#if defined(__APPLE__)
+			editingPatchName = getPatchLink();
+			snprintf(szItemName, sizeof(szItemName), "%s", editingPatchName->Name.c_str());
+			if (genny::promptText("Rename Preset", "", szItemName, szItemName, sizeof(szItemName)))
+			{
+				editingPatchName->Name = szItemName;
+				_owner->getOwner()->reconnect();
+			}
+#else
+LPWSTR str = MAKEINTRESOURCEW(IDD_DIALOG1);
 
 			MEMORY_BASIC_INFORMATION mbi;
 			static int dummyVariable;
@@ -150,6 +167,7 @@ CMouseEventResult UIPresetElement::onMouseDown (CPoint& where, const CButtonStat
 			editingPatchName = getPatchLink();
 			if (DialogBoxW(hMod, str, winFrame->getPlatformWindow(), (DLGPROC)RenameItemProc) == IDOK)
 				_owner->getOwner()->reconnect();
+#endif
 #endif
 			return CMouseEventResult::kMouseEventHandled;
 		}

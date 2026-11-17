@@ -33,7 +33,7 @@ CMouseEventResult UISpinner::onMouseUp(CPoint& where, const CButtonState& button
 	}
 	else
 	{
-		return __super::onMouseUp(where, buttons);
+		return CControl::onMouseUp(where, buttons);
 	}
 }
 
@@ -42,7 +42,7 @@ CMouseEventResult UISpinner::onMouseMoved(CPoint& where, const CButtonState& but
 	if (buttons.isRightButton())
 		return kMouseEventHandled;
 
-	return __super::onMouseMoved(where, buttons);
+	return CControl::onMouseMoved(where, buttons);
 }
 
 CMouseEventResult UISpinner::onMouseDown(CPoint& where, const CButtonState& buttons)
@@ -50,24 +50,24 @@ CMouseEventResult UISpinner::onMouseDown(CPoint& where, const CButtonState& butt
 	if (buttons.isRightButton())
 		return kMouseEventHandled;
 	else
-		return __super::onMouseDown(where, buttons);
+		return CControl::onMouseDown(where, buttons);
 }
 
 CMouseEventResult UISpinner::onMouseEntered(CPoint& where, const CButtonState& buttons)
 {
 	getInterface()->hoverControl(this);
-	return __super::onMouseEntered(where, buttons);
+	return CControl::onMouseEntered(where, buttons);
 }
 
 CMouseEventResult UISpinner::onMouseExited(CPoint& where, const CButtonState& buttons)
 {
 	getInterface()->unhoverControl(this);
-	return __super::onMouseExited(where, buttons);
+	return CControl::onMouseExited(where, buttons);
 }
 
 void UISpinner::setVisible(bool visible)
 {
-	__super::setVisible(visible);
+	CControl::setVisible(visible);
 	_midiLabel->setVisible(visible);
 	_upArrow->setVisible(visible);
 	_downArrow->setVisible(visible);

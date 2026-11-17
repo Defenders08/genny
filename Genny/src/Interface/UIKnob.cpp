@@ -4,7 +4,9 @@
 #include "IndexBaron.h"
 #include "GennyVST.h"
 #include "UIContextMenu.h"
+#if defined(_WIN32)
 #include "lib/platform/win32/win32frame.h"
+#endif
 
 UIKnob::UIKnob (const CRect& size, IControlListener* listener, int32_t tag, int32_t subPixmaps, CCoord heightOfOneImage, CBitmap* background, GennyInterface* iface, const CPoint& offset):
 	CAnimKnob(size, listener, tag, subPixmaps, heightOfOneImage, background, offset),

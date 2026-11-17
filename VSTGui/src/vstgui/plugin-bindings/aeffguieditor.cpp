@@ -12,6 +12,9 @@
 
 #include "../lib/platform/iplatformframe.h"
 
+#include <chrono>
+#include <unistd.h>
+
 #define kIdleRate    100 // host idle rate in ms
 #define kIdleRate2    50
 #define kIdleRateMin   4 // minimum time between 2 idles in ms
@@ -143,7 +146,7 @@ bool AEffGUIEditor::onWheel (float distance)
 void AEffGUIEditor::wait (uint32_t ms)
 {
 	#if MAC
-	RunCurrentEventLoop (kEventDurationMillisecond * ms);
+	usleep (static_cast<useconds_t> (ms) * 1000);
 	
 	#elif WINDOWS
 	Sleep (ms);
@@ -155,7 +158,10 @@ void AEffGUIEditor::wait (uint32_t ms)
 uint32_t AEffGUIEditor::getTicks ()
 {
 	#if MAC
-	return (TickCount () * 1000) / 60;
+	// TickCount() из Carbon недоступен в 64-битных сборках — используем monotonic-часы
+	static const auto start = std::chrono::steady_clock::now ();
+	const auto now = std::chrono::steady_clock::now ();
+	return static_cast<uint32_t> (std::chrono::duration_cast<std::chrono::milliseconds> (now - start).count ());
 	
 	#elif WINDOWS
 	return (uint32_t)GetTickCount ();

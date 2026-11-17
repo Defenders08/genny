@@ -2,7 +2,7 @@
 #include "Genny2612.h"
 #include "base/VSTBase.h"
 #include "IndexBaron.h"
-#include "GennyInterface.h"
+#include "Interface/GennyInterface.h"
 #include "../resource.h"
 
 #include "GennyLoaders.h"
@@ -11,7 +11,7 @@
 AudioEffect* createEffectInstance (audioMasterCallback audioMaster)
 {
 	GennyVST* p = new GennyVST();
-	return (AudioEffect*)p->initializeBase(audioMaster);
+	return (AudioEffect*)p->initializeBase((void*)audioMaster);
 }
 #else
 extern "C" TFruityPlug* _stdcall CreatePlugInstance(TFruityPlugHost *Host, TPluginTag Tag)
@@ -108,11 +108,21 @@ void GennyVST::sampleRateChanged(double newRate)
 
 bool isVersionNumber(long kVersion)
 {
+#if defined(__APPLE__)
+	kVersion = gennyLong32(kVersion);
+	const long indicator1 = gennyLong32(kVersionIndicator1);
+	const long indicator2 = gennyLong32(kVersionIndicator2);
+	const long latest = gennyLong32(kLatestVersion);
+	if (kVersion == indicator1 || (kVersion >= indicator2 && kVersion <= latest))
+		return true;
+	return false;
+#else
 	if (kVersion == kVersionIndicator1 ||
 		(kVersion >= kVersionIndicator2 && kVersion <= kLatestVersion))
 		return true;
 
 	return false;
+#endif
 }
 
 bool checkVersionLessThan(long kVersion, long kIsLessThan)
@@ -1826,6 +1836,10 @@ void GennyVST::setMasterVolume(float volume)
 
 void GennyVST::saveData(IStream* stream, bool save)
 {
+#if defined(__APPLE__)
+	// В VST-сборке состояние сохраняется через getChunk/setChunk, этот путь не используется
+	(void)stream; (void)save;
+#else
 	unsigned long written = 0;
 	if(save)
 	{
@@ -1847,6 +1861,7 @@ void GennyVST::saveData(IStream* stream, bool save)
 
 		setPluginState(data, streamSize, false);
 	}
+#endif
 }
 
 void GennyVST::startLogging(std::string file)

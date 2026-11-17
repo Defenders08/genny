@@ -1254,7 +1254,7 @@ int YM2612::getRegister( YM2612Param param, int channel, int op, int specialOffs
 	return 0;
 }
 
-int wait = 0;
+int gennyWaitFlag = 0;
 
 
 float inc = 0;

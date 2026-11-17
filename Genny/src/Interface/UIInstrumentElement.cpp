@@ -10,7 +10,7 @@
 class UIInstrumentElementEnableBox : public CCheckBox
 {
 public:
-	UIInstrumentElementEnableBox::UIInstrumentElementEnableBox (const CRect& size, IControlListener* listener, int32_t tag, UTF8StringPtr title, UIInstrumentsPanel* owner)
+	UIInstrumentElementEnableBox (const CRect& size, IControlListener* listener, int32_t tag, UTF8StringPtr title, UIInstrumentsPanel* owner)
 		:CCheckBox(size, listener, tag, title, UIBitmap(IDB_PNG30), 0)
 		,_mouseDown(false)
 		,controlModifier(false)
@@ -19,19 +19,19 @@ public:
 		_element = (UIInstrumentElement*)listener;
 	}
 
-	UIInstrumentElementEnableBox::~UIInstrumentElementEnableBox(void)
+	~UIInstrumentElementEnableBox(void)
 	{
 
 	}
 
-	bool UIInstrumentElementEnableBox::onWheel (const CPoint& where, const CMouseWheelAxis& axis, const float& distance, const CButtonState& buttons)
+	bool onWheel (const CPoint& where, const CMouseWheelAxis& axis, const float& distance, const CButtonState& buttons)
 	{
 		_owner->onWheel(where, axis, distance, buttons);
 		return true;
 	}
 
 
-	CMouseEventResult UIInstrumentElementEnableBox::onMouseUp(CPoint& where, const CButtonState& buttons)
+	CMouseEventResult onMouseUp(CPoint& where, const CButtonState& buttons)
 	{
 		if (buttons.isRightButton())
 		{
@@ -41,7 +41,7 @@ public:
 		return __super::onMouseUp(where, buttons);
 	}
 
-	CMouseEventResult UIInstrumentElementEnableBox::onMouseMoved(CPoint& where, const CButtonState& buttons)
+	CMouseEventResult onMouseMoved(CPoint& where, const CButtonState& buttons)
 	{
 		if (buttons.isRightButton())
 			return kMouseEventHandled;
@@ -50,19 +50,19 @@ public:
 	}
 
 
-	CMouseEventResult UIInstrumentElementEnableBox::onMouseEntered(CPoint& where, const CButtonState& buttons)
+	CMouseEventResult onMouseEntered(CPoint& where, const CButtonState& buttons)
 	{
 		_owner->getInterface()->hoverControl(this);
 		return __super::onMouseEntered(where, buttons);
 	}
 
-	CMouseEventResult UIInstrumentElementEnableBox::onMouseExited(CPoint& where, const CButtonState& buttons)
+	CMouseEventResult onMouseExited(CPoint& where, const CButtonState& buttons)
 	{
 		_owner->getInterface()->unhoverControl(this);
 		return __super::onMouseExited(where, buttons);
 	}
 
-	CMouseEventResult UIInstrumentElementEnableBox::onMouseDown (CPoint& where, const CButtonState& buttons)
+	CMouseEventResult onMouseDown (CPoint& where, const CButtonState& buttons)
 	{
 		if(buttons.getModifierState() == CButton::kControl)
 			controlModifier = true;
@@ -75,7 +75,7 @@ public:
 			return __super::onMouseDown(where, buttons);
 	}
 
-	int UIInstrumentElementEnableBox::getInstrumentIndex()
+	int getInstrumentIndex()
 	{
 		return _element->getInstrumentIndex();
 	}
@@ -191,7 +191,8 @@ CMouseEventResult UIInstrumentElement::onMouseMoved (CPoint& where, const CButto
 				//_owner->getFrame()->clearMouseDown();
 
 				CMouseEventResult res = CCheckBox::onMouseMoved(where, buttons);
-				onMouseUp(CPoint(-999, -999), buttons);
+				CPoint offscreen(-999, -999);
+				onMouseUp(offscreen, buttons);
 				setDirty(true);
 				invalid();
 				return res;

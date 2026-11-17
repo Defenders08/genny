@@ -4,7 +4,7 @@
 This class is used to render samples from a YM2612 chip. 
 It is separated from the YM2612 class to keep resampler 
 logic separate, and to make YM2612 more lightweight. */
-#include "resampler\Fir_Resampler.h"
+#include "resampler/Fir_Resampler.h"
 #include <mutex>
 #include <vector>
 

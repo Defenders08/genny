@@ -13,3 +13,10 @@ VSTGui\bin\
 /VSTGui/ARM
 /Genny/ARM
 /build/*.zip
+
+# macOS-порт: артефакты CMake
+/build-macos/
+macos-build/
+*.vst/
+CMakeCache.txt
+CMakeFiles/

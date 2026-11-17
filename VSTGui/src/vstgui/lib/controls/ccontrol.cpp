@@ -84,7 +84,7 @@ void CControl::setExtParam(GennyExtParam* pParam)
 	if (_extParam != nullptr)
 		_extParam->lastAttachedControl = nullptr;
 
-	__super::setExtParam(pParam);
+	CView::setExtParam(pParam);
 	reconnect();
 }
 

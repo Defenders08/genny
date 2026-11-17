@@ -1,5 +1,9 @@
 #include "GennyLoaders.h"
+#include <stdexcept>
 #include <windows.h>
+#if defined(__APPLE__)
+#include "platform/mac_support.h"
+#endif
 
 unsigned char GennyLoaders::ssgGennyToReg(unsigned char genny)
 {
@@ -45,6 +49,35 @@ unsigned char GennyLoaders::ssgRegToGenny(unsigned char reg)
 
 GennyData GennyLoaders::loadResource(int name, const std::wstring& format)
 {
+#if defined(__APPLE__)
+	GennyData data;
+	const std::string path = gennyBundleResourcePath(name);
+	if (path.empty())
+		return data;
+
+	FILE* file = fopen(path.c_str(), "rb");
+	if (file == nullptr)
+		return data;
+
+	fseek(file, 0, SEEK_END);
+	const long fileSize = ftell(file);
+	fseek(file, 0, SEEK_SET);
+	if (fileSize <= 0)
+	{
+		fclose(file);
+		return data;
+	}
+
+	char* buffer = new char[fileSize];
+	const size_t readBytes = fread(buffer, 1, (size_t)fileSize, file);
+	fclose(file);
+
+	data.size = (int)readBytes;
+	data.fullSize = (int)readBytes;
+	data.data = buffer;
+	data.createdData = true;
+	return data;
+#else
 	MEMORY_BASIC_INFORMATION mbi; 
 	static int dummyVariable; 
 	VirtualQuery( &dummyVariable, &mbi, sizeof(mbi) ); 
@@ -61,6 +94,7 @@ GennyData GennyLoaders::loadResource(int name, const std::wstring& format)
 	data.data = (char*)LockResource(hMem);
 
 	return data;
+#endif
 }
 
 int dtRevTable[8]={7, 6, 5, 0, 1, 2, 3, 0};
@@ -260,7 +294,7 @@ GennyData GennyLoaders::saveTYI(GennyPatch* patch)
 void GennyLoaders::loadTFI(GennyPatch* patch, GennyData& info)
 {
 	if (patch == nullptr)
-		throw std::exception("Cannot load information into null patch!");
+		throw std::runtime_error("Cannot load information into null patch!");
 
 	char* data = info.data;
 	unsigned char val = 0;
@@ -349,7 +383,7 @@ GennyData GennyLoaders::saveTFI(GennyPatch* patch)
 void GennyLoaders::loadVGI(GennyPatch* patch, GennyData& info)
 {
 	if (patch == nullptr)
-		throw std::exception("Cannot load information into null patch!");
+		throw std::runtime_error("Cannot load information into null patch!");
 
 	char* data = info.data;
 	unsigned char val = 0;
@@ -484,7 +518,7 @@ bool isVersionNumber(int pNumber)
 void GennyLoaders::loadGEN(GennyPatch* patch, GennyData* loadData)
 {
 	if (patch == nullptr)
-		throw std::exception("Cannot load information into null patch!");
+		throw std::runtime_error("Cannot load information into null patch!");
 
 	int version = loadData->readInt();
 	if (!isVersionNumber(version))
@@ -504,7 +538,9 @@ void GennyLoaders::loadGEN(GennyPatch* patch, GennyData* loadData)
 
 	patch->Name = loadData->readString();
 
+
 	loadGDAC(patch, loadData);
+
 
 	bool dac = false;
 	bool fm = false;
@@ -803,15 +839,32 @@ void GennyLoaders::loadDPACK(GennyPatch* patch, GennyData& info, int* streamPos)
 	patch->InstrumentDef.Type = GIType::DAC;
 }
 
+#if defined(__APPLE__)
+// На Windows long 32-битный, поэтому эти значения там фактически усечены до 32 бит.
+// Воспроизводим то же поведение, иначе сравнения «version >= gdacVersionN» дают другой результат.
+const long gdacVersion1 = gennyLong32(241493957835L);
+const long gdacVersion2 = gennyLong32(241493957836L);
+const long gdacVersion3 = gennyLong32(241493957837L);
+const long gdacCurrentVersion = gdacVersion3;
+
+const long gdacVersionMax = gennyLong32(241493958836L);//do not touch
+#else
 const long gdacVersion1 = 241493957835;
 const long gdacVersion2 = 241493957836;
 const long gdacVersion3 = 241493957837;
 const long gdacCurrentVersion = gdacVersion3;
 
 const long gdacVersionMax = 241493958836;//do not touch
+#endif
 bool isGDACVersion(long val)
 {
+#if defined(__APPLE__)
+	// На Windows long 32-битный, поэтому константы версий там тоже усечены
+	val = gennyLong32(val);
+	return val >= gennyLong32(gdacVersion1) && val <= gennyLong32(gdacVersionMax);
+#else
 	return val >= gdacVersion1 && val <= gdacVersionMax;
+#endif
 }
 
 void GennyLoaders::loadGDAC(GennyPatch* patch, GennyData* loadData)
