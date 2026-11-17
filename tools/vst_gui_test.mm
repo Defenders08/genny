@@ -140,10 +140,15 @@ int main(int argc, char** argv)
 		std::printf("снимок сохранён: %s (%s), размер %.0fx%.0f\n", outPath, written ? "да" : "нет",
 					bounds.size.width, bounds.size.height);
 
+		std::printf("[шаг] закрываю редактор\n");
 		effect->dispatcher(effect, effEditClose, 0, 0, nullptr, 0.0f);
+		std::printf("[шаг] редактор закрыт\n");
 		effect->dispatcher(effect, effMainsChanged, 0, 0, nullptr, 0.0f);
+		std::printf("[шаг] mainsChanged(0)\n");
 		effect->dispatcher(effect, effClose, 0, 0, nullptr, 0.0f);
+		std::printf("[шаг] effClose\n");
 		dlclose(handle);
+		std::printf("[шаг] dlclose\n");
 	}
 
 	return 0;

@@ -88,6 +88,45 @@ set(VSTSDK_SOURCES
 	${VSTSDK}/public.sdk/source/vst2.x/vstplugmain.cpp
 )
 
+# ------------------------------------------------------------------ утилита банка
+
+set(GENNY_BANK_SOURCES
+	${GENNY_ROOT}/src/Genny2612.cpp
+	${GENNY_ROOT}/src/GennyExtParam.cpp
+	${GENNY_ROOT}/src/GennyLoaders.cpp
+	${GENNY_ROOT}/src/IndexBaron.cpp
+	${GENNY_DSP_SOURCES}
+	${GENNY_GZIP}
+)
+
+add_executable(genny_bankgen tools/bank_gen.cpp ${GENNY_BANK_SOURCES})
+
+target_compile_definitions(genny_bankgen PRIVATE
+	BUILD_VST=1
+	MAC=1
+	__APPLE__=1
+	_CRT_SECURE_NO_DEPRECATE=1
+)
+
+target_include_directories(genny_bankgen PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/compat
+	${CMAKE_CURRENT_SOURCE_DIR}/compat/shim
+	${GENNY_ROOT}
+	${GENNY_ROOT}/src
+	${GENNY_ROOT}/src/VST
+	${GENNY_ROOT}/src/YM2612
+	${VSTGUI_ROOT}/src
+	${VSTGUI_ROOT}/src/vstgui
+	${VSTSDK}
+)
+
+target_compile_options(genny_bankgen PRIVATE
+	$<$<COMPILE_LANGUAGE:CXX>:-include${CMAKE_CURRENT_SOURCE_DIR}/compat/genny_mac_compat.h>
+	$<$<COMPILE_LANGUAGE:C>:-includeunistd.h>
+	-Wno-invalid-source-encoding
+	-Wno-c++11-narrowing
+)
+
 add_library(Genny MODULE
 	${GENNY_SOURCES}
 	${VSTGUI_SOURCES}

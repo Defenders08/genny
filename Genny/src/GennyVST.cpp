@@ -1782,7 +1782,14 @@ int GennyVST::getTotalPatchCount()
 		GennyData file = GennyLoaders::loadResource(SET_NEWPRESETS, L"SET");
 
 		int numPatches = file.readInt();
-		int minNumPatches = 165;
+		if (numPatches < 0)
+			numPatches = 0;
+		if (numPatches > 512)
+			numPatches = 512;  // защита от битого заголовка банка
+
+		// Раньше читались только первые 165 патчей, из-за чего расширенный банк
+		// обрезался. Теперь грузим всё, что есть в файле (но не меньше 165 слотов).
+		int minNumPatches = numPatches > 165 ? numPatches : 165;
 		for(int i = 0; i < minNumPatches; i++)
 		{
 			if (i < numPatches)

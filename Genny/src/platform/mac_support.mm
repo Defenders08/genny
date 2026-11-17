@@ -50,12 +50,27 @@ CFBundleRef gennyPluginBundle()
 
 } // namespace
 
+namespace {
+
+// Не даём хосту выгрузить плагин: у VSTGUI много статических объектов, и если
+// dlclose выгрузит библиотеку, их деструкторы вызовут уже выгруженный код.
+void pinLibrary()
+{
+	Dl_info info;
+	if (dladdr(reinterpret_cast<void*>(&pinLibrary), &info) == 0 || info.dli_fname == nullptr)
+		return;
+	dlopen(info.dli_fname, RTLD_NOW | RTLD_LOCAL | RTLD_NODELETE);
+}
+
+} // namespace
+
 void gennyEnsureVstGuiInit()
 {
 	static bool initialized = false;
 	if (initialized)
 		return;
 	initialized = true;
+	pinLibrary();
 	VSTGUI::init(gennyPluginBundle());
 }
 

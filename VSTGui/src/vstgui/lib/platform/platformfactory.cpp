@@ -18,33 +18,39 @@ using VSTGUIPlatformFactory = VSTGUI::LinuxFactory;
 //-----------------------------------------------------------------------------
 namespace VSTGUI {
 
-static PlatformFactoryPtr gPlatformFactory;
+// Фабрика живёт до конца процесса: если хост выгрузит плагин через dlclose,
+// статический деструктор вызвал бы код уже выгруженной библиотеки и уронил процесс.
+static PlatformFactoryPtr& factorySlot ()
+{
+	static PlatformFactoryPtr* slot = new PlatformFactoryPtr ();
+	return *slot;
+}
 
 //-----------------------------------------------------------------------------
 void setPlatformFactory (PlatformFactoryPtr&& f)
 {
-	gPlatformFactory = std::move (f);
+	factorySlot () = std::move (f);
 }
 
 //-----------------------------------------------------------------------------
 void initPlatform (PlatformInstanceHandle instance)
 {
-	vstgui_assert (!gPlatformFactory);
+	vstgui_assert (!factorySlot ());
 	setPlatformFactory (std::unique_ptr<IPlatformFactory> (new VSTGUIPlatformFactory (instance)));
 }
 
 //-----------------------------------------------------------------------------
 void exitPlatform ()
 {
-	vstgui_assert (gPlatformFactory);
+	vstgui_assert (factorySlot ());
 	setPlatformFactory (nullptr);
 }
 
 //-----------------------------------------------------------------------------
 const IPlatformFactory& getPlatformFactory ()
 {
-	vstgui_assert (gPlatformFactory);
-	return *gPlatformFactory.get ();
+	vstgui_assert (factorySlot ());
+	return *factorySlot ().get ();
 }
 
 //-----------------------------------------------------------------------------

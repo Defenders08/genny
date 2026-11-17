@@ -180,23 +180,22 @@ void UIPresetsPanel::valueChanged (CControl* control)
 	}
 	else if(control->getTag() == 9999999)
 	{
-		if(_topItem > 0 && control->getValue() > 0.5f)
+		// Стрелка вверх переключает на предыдущий пресет (а не прокручивает список)
+		if(control->getValue() > 0.5f)
 		{
-			int numScrollItems = getVst()->getNumPatches() - numPresets;
-			_scrollBar->setValue((float)(_topItem - 1) / (float)numScrollItems);
-			_scrollBar->valueChanged();
+			const int total = getVst()->getNumPatches();
+			if(total > 0)
+				setSelection(_selection > 0 ? _selection - 1 : 0);
 		}
 	}
 	else if(control->getTag() == 99999999)
 	{
+		// Стрелка вниз переключает на следующий пресет
 		if(control->getValue() > 0.5f)
-		{	
-			int numScrollItems = getVst()->getNumPatches() - numPresets;
-			if(_topItem < numScrollItems)
-			{
-				_scrollBar->setValue((float)(_topItem + 1) / (float)numScrollItems);
-				_scrollBar->valueChanged();
-			}
+		{
+			const int total = getVst()->getNumPatches();
+			if(total > 0)
+				setSelection(_selection + 1 < total ? _selection + 1 : total - 1);
 		}
 	}
 	else if(control->getTag() == 999999)
@@ -355,8 +354,18 @@ bool UIPresetsPanel::onWheel (const CPoint& where, const CMouseWheelAxis& axis, 
 {
 	if (_scrollBar->isVisible())
 	{
-		int numScrollItems = getVst()->getNumPatches() - numPresets;
-		_scrollBar->setValue((float)(_topItem - ((int)distance)) / (float)numScrollItems);
+		const int numPatches = getVst()->getNumPatches();
+		const int numScrollItems = numPatches - numPresets;
+		if (numScrollItems <= 0)
+			return true;  // прокручивать нечего: пресетов меньше, чем строк в списке
+
+		int top = _topItem - ((int)distance);
+		if (top < 0)
+			top = 0;
+		if (top > numScrollItems)
+			top = numScrollItems;
+
+		_scrollBar->setValue((float)top / (float)numScrollItems);
 		_scrollBar->valueChanged();
 	}
 	return true;

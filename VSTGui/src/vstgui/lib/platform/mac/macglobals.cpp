@@ -44,8 +44,9 @@ public:
 //-----------------------------------------------------------------------------
 static CGColorMap& getColorMap ()
 {
-	static CGColorMapImpl colorMap;
-	return colorMap.map;
+	// Намеренная утечка: объект не должен разрушаться после dlclose плагина
+	static CGColorMapImpl* colorMap = new CGColorMapImpl ();
+	return colorMap->map;
 }
 
 //-----------------------------------------------------------------------------

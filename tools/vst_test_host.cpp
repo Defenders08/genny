@@ -134,7 +134,7 @@ int main(int argc, char** argv)
 	for (int i = 0; i < 4; ++i)
 	{
 		char programName[128] = {0};
-		effect->dispatcher(effect, effGetProgramNameIndexed, 0, i, programName, 0.0f);
+		effect->dispatcher(effect, effGetProgramNameIndexed, i, 0, programName, 0.0f);
 		std::printf("программа %d: '%s'\n", i, programName);
 	}
 	for (int i = 0; i < 3; ++i)
