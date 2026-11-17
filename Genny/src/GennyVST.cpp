@@ -79,6 +79,11 @@ void GennyVST::destroy()
 		_editor->close();
 		delete _editor;
 		_editor = nullptr;
+#if BUILD_VST
+		// Деструктор AudioEffect тоже удаляет editor — снимаем ссылку, иначе double free
+		if (_base != nullptr)
+			_base->setEditor(nullptr);
+#endif
 	}
 
 	if (_core != nullptr)
@@ -366,8 +371,6 @@ int GennyVST::getPluginState (void** data, bool isPreset)
 }
 int GennyVST::setPluginState (void* data, int size, bool isPreset)
 {	
-	std::stringstream stream(std::string((char*)data));
-
 	int numPatches = getTotalPatchCount();
 	int numParams = GennyPatch::getNumParameters();
 	_core->rebuildIndexBaron();
@@ -482,9 +485,15 @@ int GennyVST::setPluginState (void* data, int size, bool isPreset)
 		setPatchIndex(i);
 
 		int nameLength = 0;
-
 		memcpy(&nameLength, &((char*)data)[readPos], sizeof(int));
 		readPos += sizeof(int);
+
+		// Проверка границ: битый чанк не должен привести к огромному new[]
+		if (nameLength < 0 || readPos + nameLength + 1 > size)
+		{
+			_saving = false;
+			return 0;
+		}
 
 		char* name = new char[nameLength + 1];
 		memcpy(name, &((char*)data)[readPos], nameLength + 1);
@@ -523,6 +532,13 @@ int GennyVST::setPluginState (void* data, int size, bool isPreset)
 					int sampleSize = 0;
 					memcpy(&sampleSize, &((char*)data)[readPos], sizeof(sampleSize));
 					readPos += sizeof(sampleSize);
+
+					// Проверка границ: иначе new[] с мусорным размером роняет хост
+					if (sampleSize < 0 || readPos + sampleSize > size)
+					{
+						_saving = false;
+						return 0;
+					}
 
 					char* sampleData = new char[sampleSize];
 					memcpy(sampleData, &((char*)data)[readPos], sampleSize);

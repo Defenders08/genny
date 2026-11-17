@@ -3,7 +3,14 @@
 #include <mutex>
 
 //long versionIndicator = nullptr //Before February 17, 2019 - Version 0.5 (no version indicator)
+#if defined(__APPLE__)
+// В MSVC long 32-битный, и это значение там отрицательное. На 64-битном long
+// сравнение «версия >= kVersionIndicator1» даёт другой результат, из-за чего
+// разбор состояния уезжает на 4 байта. Воспроизводим поведение Windows.
+const long kVersionIndicator1 = gennyLong32(593829658389673L); //February 17, 2019 - Version 1.0 //OBSOLETE! NO LONGER SUPPORTED!
+#else
 const long kVersionIndicator1 = (long)593829658389673; //February 17, 2019 - Version 1.0 //OBSOLETE! NO LONGER SUPPORTED!
+#endif
 const long kVersionIndicator2 = 1127443247; //February 20, 2019 - Version 1.01
 const long kVersionIndicator3 = 1127443248; //June 21, 2019 - Version 1.02
 const long kVersionIndicator4 = 1127443249; //Sept 16, 2019 - Version 1.03 (Added VST automation)

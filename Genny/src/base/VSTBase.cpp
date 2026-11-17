@@ -1,4 +1,6 @@
 #include "VSTBase.h"
+#include <cstdio>
+#include <stdexcept>
 #include "Genny2612.h"
 #include "VirtualInstrument.h"
 #include "gmnames.h"
@@ -215,7 +217,25 @@ VstInt32 VSTBase::processEvents (VstEvents* ev)
 }
 VstIntPtr VSTBase::dispatcher(VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt)
 {
+#if defined(__APPLE__)
+	// Исключение не должно выходить в хост: FL Studio на этом падает целиком
+	try
+	{
+		return AudioEffectX::dispatcher(opcode, index, value, ptr, opt);
+	}
+	catch (const std::exception& e)
+	{
+		fprintf(stderr, "[genny] исключение в dispatcher (opcode %d): %s\n", (int)opcode, e.what());
+		return 0;
+	}
+	catch (...)
+	{
+		fprintf(stderr, "[genny] неизвестное исключение в dispatcher (opcode %d)\n", (int)opcode);
+		return 0;
+	}
+#else
 	return AudioEffectX::dispatcher(opcode, index, value, ptr, opt);
+#endif
 }
 
 void VSTBase::resume()

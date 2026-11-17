@@ -102,6 +102,7 @@ AEffect* loadPlugin(const std::string& bundlePath, void** handleOut)
 
 int main(int argc, char** argv)
 {
+	std::setvbuf(stdout, nullptr, _IONBF, 0);
 	const std::string bundlePath = (argc > 1) ? argv[1]
 		: "build/dist/Genny.vst/Contents/MacOS/Genny";
 
@@ -149,6 +150,19 @@ int main(int argc, char** argv)
 	std::fprintf(stderr, "[trace] mainsChanged...\n"); std::fflush(stderr);
 	effect->dispatcher(effect, effMainsChanged, 0, 1, nullptr, 0.0f);
 	std::fprintf(stderr, "[trace] рендер...\n"); std::fflush(stderr);
+
+	// Круговой тест состояния: именно это делает FL при загрузке плагина
+	for (int chunkIndex = 0; chunkIndex < 2; ++chunkIndex)
+	{
+		void* chunk = nullptr;
+		const long chunkSize = (long)effect->dispatcher(effect, effGetChunk, chunkIndex, 0, &chunk, 0.0f);
+		std::printf("состояние %d: получено %ld байт\n", chunkIndex, chunkSize);
+		if (chunkSize > 0 && chunk != nullptr)
+		{
+			const long applied = (long)effect->dispatcher(effect, effSetChunk, chunkIndex, chunkSize, chunk, 0.0f);
+			std::printf("состояние %d: применено, ответ %ld\n", chunkIndex, applied);
+		}
+	}
 
 	ERect* rect = nullptr;
 	if (effect->dispatcher(effect, effEditGetRect, 0, 0, &rect, 0.0f) && rect != nullptr)
